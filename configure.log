@@ -1,0 +1,7 @@
+/root/Slack/config_Check.sh: line 3: apache2: command not found
+PHP Version: 1
+Current PHP Version: 7.3.11
+Apache Version: 2
+Current Apache Version: 
+Gracefuly Restarting Apache...
+/root/Slack/config_Check.sh: line 14: apache2ctl: command not found
