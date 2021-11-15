@@ -1,18 +1,18 @@
 #!/bin/bash
-packages=( inotify-tools apache2 php libapache2-mod-php )
-CRON_FILE="/var/spool/cron/crontabs/root"
+packages=( inotify-tools php libapache2-mod-php apache2)
+#CRON_FILE="/var/spool/cron/crontabs/root"
 CHECK_CONFIGURATION="/root/config_Check.sh"
 APACHE_CONFIG="/etc/apache2/apache2.conf"
 HTACCESS="/var/www/html/.htaccess"
-DOCROOT="/var/www/html/"
-
-configure_Apache(){
-	cp test.php "$DOCROOT"
-	echo "DirectoryIndex test.php" >> "$HTACCESS"
+APACHE_CONFIG_COMMAND=$(sed  -n '/<Directory \/var\/www\/>/,/<\/Directory>/p' /etc/apache2/apache2.conf | grep AllowOverride| grep -i None)
+HTACCESS_COMMAND=$(cat /var/www/html/.htaccess | grep "DirectoryIndex" | grep -v ".php")
+configure_Apache_Config(){
 	sed  -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' "$APACHE_CONFIG"
 	echo "ServerName localhost" >>  "$APACHE_CONFIG"
-	echo "Restarting Apache service..."
-        systemctl restart apache2
+}
+
+configure_HTACCESS(){
+	echo "DirectoryIndex test.php" >> "$HTACCESS"
 }
 
 for package in "${packages[@]}"
@@ -22,38 +22,75 @@ do
   	echo "Installing $package..."
 	apt install -y "$package"
 
-	if [[ "$package" == "libapache2-mod-php" ]] ||  [[ "$package" == "apache2" ]];then	
+	if [[ "$package" == "libapache2-mod-php" ]] ;then	
+		
 		#Set the Apache version as env variable
-		export apache_version=$(apache2 -version| grep -i version| awk -F '/' '{print $2}' | awk '{print $1}')
+		apache_version=$(apache2 -version| grep -i version| awk -F '/' '{print $2}' | awk '{print $1}')
+		echo "$apache_version" > apache_version
 		#Configure Apache if apache2.conf and .htaccess is absent
-		if [ ! -f $APACHE_CONFIG ] && [ ! -f $HTACCESS ];then
+		if [ ! -f $APACHE_CONFIG ];then
 		   echo "Configuring Apache..."
-	           configure_Apache
-		else
-		   echo "Restarting Apache service..."
-		   systemctl restart apache2
+	           configure_Apache_Config
 		fi
+		if [ ! -f $HTACCESS ]; then
+		    echo "Configure HTACCESS..."
+	            configure_HTACCESS
+		fi
+		if [ -f $APACHE_CONFIG ];then
+		   if [[ $APACHE_CONFIG_COMMAND ]]; then
+                   	echo "Configuring Apache..."
+                   	
+		   fi
+		fi
+		if [ -f $HTACCESS ]; then
+		   if [[ $HTACCESS_COMMAND ]]; then
+		       echo "Configure HTACCESS..."
+                       configure_HTACCESS
+		   fi
+		fi
+
+		echo "Restarting Apache service..."
+		systemctl restart apache2
+
 	elif [[ "$package" == "php" ]]; then
+		
 		#Set the PHP version as env variable
-		export php_version=$(php -v| grep -i "^PHP"| awk '{print $2}'| awk -F '-' '{print $1}')
+		php_version=$(php -v| grep -i "^PHP"| awk '{print $2}'| awk -F '-' '{print $1}')
+		echo "$php_version" > php_version
+
 	fi	
   else
-	echo "Package $package is already installed"
+	echo "Package $package is already installed..."
   fi
 done
 
-if [ ! -f $CRON_FILE ]; then
-    echo "cron file for root doesnot exist, creating.."
-    touch $CRON_FILE
-    /usr/bin/crontab $CRON_FILE
-fi
+#if [ ! -f $CRON_FILE ]; then
+#    echo "cron file for root doesnot exist, creating.."
+#    touch $CRON_FILE
+#    /usr/bin/crontab $CRON_FILE
+#fi
 
-# Set a cron entry for config_Check.sh
-grep -qi "$CHECK_CONFIGURATION" $CRON_FILE
-	if [ $? != 0 ]; then
-	   echo "Updating cron job..."
-           /bin/echo "* * * * * /bin/bash $CHECK_CONFIGURATION >/root/configure.log 2>&1" >> $CRON_FILE
-	   systemctl restart cron.service
-	fi
+#Invoke version_Check.sh
+echo "Calling version_Check.sh..."
+./version_Check.sh
 
-#nohup config_Check.sh > /dev/null
+
+#Invoke config_Check.sh
+echo "Calling config_Check.sh..."
+nohup bash config_Check.sh  </dev/null >/dev/null 2>&1 &
+#
+
+
+#nohup ./config_Check.sh > config.log  &
+
+#sleep 10
+#
+## Set a cron entry for config_Check.sh
+#grep -qi "$CHECK_CONFIGURATION" $CRON_FILE
+#	if [ $? != 0 ]; then
+#	   echo "Updating cron job..."
+#           /bin/echo "* * * * * /bin/bash $CHECK_CONFIGURATION >/root/configure.log 2>&1" >> $CRON_FILE
+#	   systemctl restart cron.service
+#	fi
+#
+##nohup config_Check.sh > /dev/null
