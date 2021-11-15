@@ -108,11 +108,21 @@ while getopts ":t:f:c:m:u:g:i:r:p:" options; do
       ;;
      u)
 	     user=${OPTARG}
-	     ssh root@$ip "chown ${user} ${file_name}"
+	     ssh root@$ip "getent passwd $user"
+	     if [ $? -ne 0 ];then
+		echo "User $user doesn't exist"
+	     else
+	     	ssh root@$ip "chown ${user} ${file_name}"
+	     fi
       ;;
      g)
 	     group=${OPTARG}
-	     ssh root@$ip "chown :${group} ${file_name}"
+	     ssh root@$ip "getent group $group"
+	     if [ $? -ne 0 ];then
+                echo "Group $group doesn't exist"
+             else
+	     	ssh root@$ip "chown :${group} ${file_name}"
+	     fi
       ;;
 
      i)
