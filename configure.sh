@@ -128,4 +128,4 @@ while getopts ":f:c:m:u:g:i:r:t:" options; do
 done
 }
 
-main()
+main
