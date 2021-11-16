@@ -1,6 +1,7 @@
 #!/bin/bash
-packages=( inotify-tools php libapache2-mod-php apache2)
-#CRON_FILE="/var/spool/cron/crontabs/root"
+#packages=( inotify-tools php libapache2-mod-php apache2)
+CRON_FILE="/var/spool/cron/crontabs/root"
+packages=( inotify-tools php libapache2-mod-php)
 CHECK_CONFIGURATION="/root/config_Check.sh"
 APACHE_CONFIG="/etc/apache2/apache2.conf"
 HTACCESS="/var/www/html/.htaccess"
@@ -39,6 +40,7 @@ do
 		if [ -f $APACHE_CONFIG ];then
 		   if [[ $APACHE_CONFIG_COMMAND ]]; then
                    	echo "Configuring Apache..."
+			configure_Apache_Config
                    	
 		   fi
 		fi
@@ -51,6 +53,7 @@ do
 
 		echo "Restarting Apache service..."
 		systemctl restart apache2
+
 
 	elif [[ "$package" == "php" ]]; then
 		
@@ -77,20 +80,25 @@ echo "Calling version_Check.sh..."
 
 #Invoke config_Check.sh
 echo "Calling config_Check.sh..."
-nohup bash config_Check.sh  </dev/null >/dev/null 2>&1 &
-#
+#nohup bash config_Check.sh  </dev/null >/dev/null 2>&1  &
+nohup bash config_Check.sh > /root/configure.log  2>&1 &
 
 
 #nohup ./config_Check.sh > config.log  &
 
-#sleep 10
+
+#if [ ! -f $CRON_FILE ]; then
+#    echo "cron file for root doesnot exist, creating.."
+#    touch $CRON_FILE
+#    /usr/bin/crontab $CRON_FILE
+#fi
 #
-## Set a cron entry for config_Check.sh
-#grep -qi "$CHECK_CONFIGURATION" $CRON_FILE
-#	if [ $? != 0 ]; then
-#	   echo "Updating cron job..."
-#           /bin/echo "* * * * * /bin/bash $CHECK_CONFIGURATION >/root/configure.log 2>&1" >> $CRON_FILE
-#	   systemctl restart cron.service
-#	fi
+### Set a cron entry for config_Check.sh
+#pattern=$(grep -v "^#" $CRON_FILE| grep -qi "$CHECK_CONFIGURATION")
+#if [[ $? -eq 1 ]]; then
+#    echo "Updating cron entry with the script config_Check.sh..."
+#    /bin/echo "1 * * * * /bin/bash $CHECK_CONFIGURATION >/root/configure.log 2>&1" >> $CRON_FILE
+#    systemctl restart cron.service
+#fi
 #
-##nohup config_Check.sh > /dev/null
+#nohup config_Check.sh > /dev/null
