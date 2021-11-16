@@ -6,7 +6,7 @@ CHECK_CONFIGURATION="/root/config_Check.sh"
 APACHE_CONFIG="/etc/apache2/apache2.conf"
 HTACCESS="/var/www/html/.htaccess"
 APACHE_CONFIG_COMMAND=$(sed  -n '/<Directory \/var\/www\/>/,/<\/Directory>/p' /etc/apache2/apache2.conf | grep AllowOverride| grep -i None)
-HTACCESS_COMMAND=$(cat /var/www/html/.htaccess | grep "DirectoryIndex" | grep -v ".php")
+#HTACCESS_COMMAND=$(cat /var/www/html/.htaccess | grep "DirectoryIndex" | grep -v ".php")
 configure_Apache_Config(){
 	sed  -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' "$APACHE_CONFIG"
 	echo "ServerName localhost" >>  "$APACHE_CONFIG"
@@ -28,6 +28,17 @@ do
 		#Set the Apache version as env variable
 		apache_version=$(apache2 -version| grep -i version| awk -F '/' '{print $2}' | awk '{print $1}')
 		echo "$apache_version" > apache_version
+	elif [[ "$package" == "php" ]]; then
+
+                #Set the PHP version as env variable
+                php_version=$(php -v| grep -i "^PHP"| awk '{print $2}'| awk -F '-' '{print $1}')
+                echo "$php_version" > php_version
+	else
+               echo "Package $package is already installed..."
+        fi
+   fi
+done
+
 		#Configure Apache if apache2.conf and .htaccess is absent
 		if [ ! -f $APACHE_CONFIG ];then
 		   echo "Configuring Apache..."
@@ -45,7 +56,9 @@ do
 		   fi
 		fi
 		if [ -f $HTACCESS ]; then
-		   if [[ $HTACCESS_COMMAND ]]; then
+		   echo "HTACCESS file path: $HTACCESS"
+		   cat /var/www/html/.htaccess | grep "DirectoryIndex" | grep -v ".php"
+		   if [[ $? -ne 0 ]]; then
 		       echo "Configure HTACCESS..."
                        configure_HTACCESS
 		   fi
@@ -55,17 +68,17 @@ do
 		systemctl restart apache2
 
 
-	elif [[ "$package" == "php" ]]; then
-		
-		#Set the PHP version as env variable
-		php_version=$(php -v| grep -i "^PHP"| awk '{print $2}'| awk -F '-' '{print $1}')
-		echo "$php_version" > php_version
-
-	fi	
-  else
-	echo "Package $package is already installed..."
-  fi
-done
+#	elif [[ "$package" == "php" ]]; then
+#		
+#		#Set the PHP version as env variable
+#		php_version=$(php -v| grep -i "^PHP"| awk '{print $2}'| awk -F '-' '{print $1}')
+#		echo "$php_version" > php_version
+#
+#	fi	
+#  else
+#	echo "Package $package is already installed..."
+#  fi
+#done
 
 #if [ ! -f $CRON_FILE ]; then
 #    echo "cron file for root doesnot exist, creating.."
