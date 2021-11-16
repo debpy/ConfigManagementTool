@@ -5,6 +5,11 @@ Capabilities
 3)Install & Remove packages in the target host
 4)Restart necessary web service when relevant config files are modified and packages are updated
 5)The tool is indempotent. It saves the current state of the system config.
+6)The tool can be run by specifying "debconf" in the commandline without running ./configure.sh by settng an alias in ~/.bashrc
+---------------------------------------
+# cat ~/.bashrc | grep debconf
+alias debconf="/root/Slack/configure.sh" 
+---------------------------------------
 
 Assumptions
 ~~~~~~~~~~~~~~
