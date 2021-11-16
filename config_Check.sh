@@ -8,4 +8,9 @@ do
 	apachectl configtest
 	echo "Restarting Apache"
 	systemctl restart apache2
+	if [ $? -ne 0 ];then
+	       echo "Failed to restart, Fixing it..."
+       	       systemctl reset-failed apache2.service	       
+	       systemctl restart apache2
+	fi
 done

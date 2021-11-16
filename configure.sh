@@ -1,6 +1,6 @@
 #!/bin/bash
 WORKDIR="/root/Slack"
-scripts=("bootstrap.sh" "config_Check.sh" "configure.sh" "version_Check.sh")
+#scripts=("bootstrap.sh" "config_Check.sh" "configure.sh" "version_Check.sh")
 usage() {                                 # Function: Print a help message.
   echo "Usage: $0 [ -t target_host ]  [ -f filepath ] [ -c content in quotes ] [ -u user ] [ -g group ] [ -m mode ] [ -i package names in quotes ] [ -r packag names inside quotes ] [ -p PHPApp ]" 1>&2 
 }
@@ -10,11 +10,11 @@ exit_abnormal() {                         # Function: Exit with error.
   exit 1
 }
 
-sync_Remote_Script(){
-	for script in "${scripts[@]}"; do
-		scp $WORKDIR/$script root@$ip:
-	done
-}
+#sync_Remote_Script(){
+#	for script in "${scripts[@]}"; do
+#		scp $WORKDIR/$script root@$ip:
+#	done
+#}
 
 copy_Scripts(){
    ssh-keygen -t rsa -b 4096
@@ -79,9 +79,10 @@ function remote_Access(){
 	else
 	    echo "Host present in $FILE"
 	    echo "Syncing the remote $ip with local scripts..."
-	    sync_Remote_Script
+	    #sync_Remote_Script
 	    #cd $WORKDIR && rsync -aPvzhe ssh  --include '*.sh' --exclude '*' root@$ip:
             #cd $WORKDIR && scp "*.sh" root@$ip:
+	    scp -r /root/Slack/*.sh root@$ip:
 	    echo "Invoking ./bootstrap.sh..."
 	    ssh root@$ip "./bootstrap.sh"
         fi

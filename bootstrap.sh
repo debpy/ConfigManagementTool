@@ -33,12 +33,12 @@ do
                 #Set the PHP version as env variable
                 php_version=$(php -v| grep -i "^PHP"| awk '{print $2}'| awk -F '-' '{print $1}')
                 echo "$php_version" > php_version
-	else
+	fi
+  else
                echo "Package $package is already installed..."
-        fi
    fi
 done
-
+                
 		#Configure Apache if apache2.conf and .htaccess is absent
 		if [ ! -f $APACHE_CONFIG ];then
 		   echo "Configuring Apache..."

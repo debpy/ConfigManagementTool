@@ -1,0 +1,39 @@
+Capabilities
+~~~~~~~~~~~~~~
+1)This tool runs a given PHP app in the given target host by setting up Apache webserver for delivering the web content.
+2)Creates file with the name, content and necessary meta data(owner, group, permission modes)
+3)Install & Remove packages in the target host
+4)Restart necessary web service when relevant config files are modified
+
+Assumptions
+~~~~~~~~~~~~~~
+The first time prerequisite packages installation of "inotify-tools", "php", "libapache2-mod-php" must be done using this tool rather than manually.
+
+Architecture
+~~~~~~~~~~~~~~
+This tool consists of 4 scripts configure.sh, bootstrap.sh, version_Check.sh, config_Check.sh which gets executed in the mentioned order.Each of the script functionalities will be highlighted below
+
+configure.sh
+---------------
+1)This is the entry point of the program.
+2)It accepts several paramaters with corresponding options for performing relevant tasks(installing, removing packages, creating file with given content and metadata(owner, group, permission modes), copies php App to the Document Root of the Apache Webserver, configuring Apache
+3)It copies all the 4 above mentioned shell scripts for execution to the target host considering whether it has been copied earlier or there are modifications in the targt host.
+4)It takes a note of the hosts already configured by writing their IP to a file
+5)It invokes the "bootstrap.sh" internally
+
+bootstrap.sh
+-------------
+1)This script install the necessary packages("inotify-tools", "php", "libapache2-mod-php") if not installed
+2)It sets up the Apache config and .htaccess with the necessary contents for rendering the web content
+3)It writes the Apache & PHP version to the respective files. 
+4)It then calls the "version_Check.sh" & "config_Check.sh" internally
+
+version_Check.sh
+--------------------
+1)It reads the initial Apache and PHP versions from the above mentioned files and compares it with the one currently present
+2)On detecting a change in versions it restarts Apache webservice
+
+config_Check.sh
+----------------
+1)This monitors the Apache config directory for changes and restart Apache
+2)On Apache start up failure it takes necessary actions to get it fixed
