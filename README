@@ -3,7 +3,8 @@ Capabilities
 1)This tool runs a given PHP app in the given target host by setting up Apache webserver for delivering the web content.
 2)Creates file with the name, content and necessary meta data(owner, group, permission modes)
 3)Install & Remove packages in the target host
-4)Restart necessary web service when relevant config files are modified
+4)Restart necessary web service when relevant config files are modified and packages are updated
+5)The tool is indempotent. It saves the current state of the system config.
 
 Assumptions
 ~~~~~~~~~~~~~~
