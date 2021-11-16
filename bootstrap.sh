@@ -1,12 +1,9 @@
 #!/bin/bash
-#packages=( inotify-tools php libapache2-mod-php apache2)
-CRON_FILE="/var/spool/cron/crontabs/root"
 packages=( inotify-tools php libapache2-mod-php)
 CHECK_CONFIGURATION="/root/config_Check.sh"
 APACHE_CONFIG="/etc/apache2/apache2.conf"
 HTACCESS="/var/www/html/.htaccess"
 APACHE_CONFIG_COMMAND=$(sed  -n '/<Directory \/var\/www\/>/,/<\/Directory>/p' /etc/apache2/apache2.conf | grep AllowOverride| grep -i None)
-#HTACCESS_COMMAND=$(cat /var/www/html/.htaccess | grep "DirectoryIndex" | grep -v ".php")
 configure_Apache_Config(){
 	sed  -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' "$APACHE_CONFIG"
 	echo "ServerName localhost" >>  "$APACHE_CONFIG"
@@ -67,51 +64,11 @@ done
 		echo "Restarting Apache service..."
 		systemctl restart apache2
 
-
-#	elif [[ "$package" == "php" ]]; then
-#		
-#		#Set the PHP version as env variable
-#		php_version=$(php -v| grep -i "^PHP"| awk '{print $2}'| awk -F '-' '{print $1}')
-#		echo "$php_version" > php_version
-#
-#	fi	
-#  else
-#	echo "Package $package is already installed..."
-#  fi
-#done
-
-#if [ ! -f $CRON_FILE ]; then
-#    echo "cron file for root doesnot exist, creating.."
-#    touch $CRON_FILE
-#    /usr/bin/crontab $CRON_FILE
-#fi
-
 #Invoke version_Check.sh
 echo "Calling version_Check.sh..."
 ./version_Check.sh
 
 
 #Invoke config_Check.sh
-echo "Calling config_Check.sh..."
-#nohup bash config_Check.sh  </dev/null >/dev/null 2>&1  &
+echo "Invoking config_Check.sh in background..."
 nohup bash config_Check.sh > /root/configure.log  2>&1 &
-
-
-#nohup ./config_Check.sh > config.log  &
-
-
-#if [ ! -f $CRON_FILE ]; then
-#    echo "cron file for root doesnot exist, creating.."
-#    touch $CRON_FILE
-#    /usr/bin/crontab $CRON_FILE
-#fi
-#
-### Set a cron entry for config_Check.sh
-#pattern=$(grep -v "^#" $CRON_FILE| grep -qi "$CHECK_CONFIGURATION")
-#if [[ $? -eq 1 ]]; then
-#    echo "Updating cron entry with the script config_Check.sh..."
-#    /bin/echo "1 * * * * /bin/bash $CHECK_CONFIGURATION >/root/configure.log 2>&1" >> $CRON_FILE
-#    systemctl restart cron.service
-#fi
-#
-#nohup config_Check.sh > /dev/null

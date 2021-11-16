@@ -10,8 +10,6 @@ echo "Current PHP Version: $current_php_version"
 echo "Apache Version: $apache_version"
 echo "Current Apache Version: $current_apache_version"
 
-#if [[ -n "$php_version" && "$current_php_version" != "$php_version" ]] || [[ -n "$apache_version" && $current_apache_version !=  $apache_version ]];then
-
 if [[ "$current_php_version" != "$php_version" ]] || [[ $current_apache_version !=  $apache_version ]];then
 	echo "Gracefuly Restarting Apache..."
         apache2ctl restart

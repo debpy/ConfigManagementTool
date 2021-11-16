@@ -1,6 +1,5 @@
 #!/bin/bash
 WORKDIR="/root/Slack"
-#scripts=("bootstrap.sh" "config_Check.sh" "configure.sh" "version_Check.sh")
 usage() {                                 # Function: Print a help message.
   echo "Usage: $0 [ -t target_host ]  [ -f filepath ] [ -c content in quotes ] [ -u user ] [ -g group ] [ -m mode ] [ -i package names in quotes ] [ -r packag names inside quotes ] [ -p PHPApp ]" 1>&2 
 }
@@ -9,12 +8,6 @@ exit_abnormal() {                         # Function: Exit with error.
   usage
   exit 1
 }
-
-#sync_Remote_Script(){
-#	for script in "${scripts[@]}"; do
-#		scp $WORKDIR/$script root@$ip:
-#	done
-#}
 
 copy_Scripts(){
    ssh-keygen -t rsa -b 4096
@@ -51,21 +44,6 @@ remove_Package(){
     done   
 }
 
-##Check whether command line args passed to the script
-#if [ "$#" -eq 0 ]; then
-#   echo "Please mention the necessary options or args"
-#   exit_abnormal
-#fi
-#
-##Parse IP address
-#echo "Print all command line args: $@"
-#for ipAddr in "$@";do
-#    if [[ $ipAddr =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]];then
-#	export ip=$ipAddr
-#        echo "IP address: $ip"
-#    fi
-#done
-
 function remote_Access(){
 
     FILE="/root/Slack/hosts"
@@ -79,9 +57,7 @@ function remote_Access(){
 	else
 	    echo "Host present in $FILE"
 	    echo "Syncing the remote $ip with local scripts..."
-	    #sync_Remote_Script
 	    #cd $WORKDIR && rsync -aPvzhe ssh  --include '*.sh' --exclude '*' root@$ip:
-            #cd $WORKDIR && scp "*.sh" root@$ip:
 	    scp -r /root/Slack/*.sh root@$ip:
 	    echo "Invoking ./bootstrap.sh..."
 	    ssh root@$ip "./bootstrap.sh"
@@ -165,6 +141,3 @@ while getopts ":t:f:c:m:u:g:i:r:p:" options; do
       ;;
   esac
 done
-
-#echo "Calling config_Check.sh..."
-#nohup ./config_Check.sh > config.log &

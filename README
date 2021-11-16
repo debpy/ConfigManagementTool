@@ -7,7 +7,11 @@ Capabilities
 
 Assumptions
 ~~~~~~~~~~~~~~
-The first time prerequisite packages installation of "inotify-tools", "php", "libapache2-mod-php" must be done using this tool rather than manually.
+*1)A directory /root/Slack needs to be created which will contain all the scripts. In order to change this all the instances of /root/Slack needs to be modified with the given directory  
+2)The tool needs to be executed with root user
+3)The first time prerequisite packages installation of "inotify-tools", "php", "libapache2-mod-php" must be done using this tool rather than manually.
+
+*Note: Point 1 - > In future dynamic functionality will be implemented which get the directory as command line args and assign it to a variable and which will be used globally.
 
 Architecture
 ~~~~~~~~~~~~~~
